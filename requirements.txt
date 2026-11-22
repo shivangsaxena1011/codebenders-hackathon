@@ -1,0 +1,1 @@
+# CareRelay runs on the Python 3 standard library with zero third-party dependencies.

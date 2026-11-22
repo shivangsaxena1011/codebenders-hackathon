@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f766e" />
+  <title>CareRelay — The Family Care Hub</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="/styles.css?v=3" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-dot">CR</div>
+      <div>
+        <h1>CareRelay</h1>
+        <p class="subtitle" id="patientBanner">Loading synthetic care hub...</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <label class="role-picker">
+        <span>Active Role (RBAC):</span>
+        <select id="roleSelect" aria-label="Switch Active Role">
+          <option value="remote">Arjun Sharma — Remote Co-Manager (Bengaluru)</option>
+          <option value="primary">Priya Sharma — Primary Caregiver (Bhopal)</option>
+          <option value="attendant">Sunita Devi — Care Attendant (Task-Only)</option>
+          <option value="doctor">Dr. R. K. Verma — Doctor 24h Pass</option>
+        </select>
+      </label>
+      <button id="btnDoctorBrief" class="btn btn-outline">Doctor Visit Brief</button>
+    </div>
+  </header>
+
+  <div class="guardrail-banner" id="guardrailBanner">
+    <strong>Information Organization Only:</strong> CareRelay does not diagnose or give medical advice. Clinical decisions stay with doctors. Synthetic demo data only.
+  </div>
+
+  <main class="container">
+    <!-- 10-Second Remote Briefing ("Pulse View") -->
+    <section id="pulseSection" class="pulse-grid" aria-label="10-Second Remote Briefing">
+      <div class="pulse-card urgent">
+        <span class="pulse-label">1. Needs Action Now</span>
+        <div class="pulse-value" id="pulseUrgentCount">—</div>
+        <p class="pulse-detail" id="pulseUrgentText">Checking refills & backup requests...</p>
+      </div>
+      <div class="pulse-card active">
+        <span class="pulse-label">2. Who Is On Point Today</span>
+        <div class="pulse-value" id="pulseOnPointCount">—</div>
+        <p class="pulse-detail" id="pulseOnPointText">Loading active caregivers...</p>
+      </div>
+      <div class="pulse-card recent">
+        <span class="pulse-label">3. Latest Verified Update</span>
+        <div class="pulse-value" id="pulseLatestAction">—</div>
+        <p class="pulse-detail" id="pulseLatestText">Loading audit ledger...</p>
+      </div>
+    </section>
+
+    <!-- Smart Note / Prescription Extractor -->
+    <section id="extractorSection" class="card">
+      <div class="card-header">
+        <div>
+          <h2>Quick Note / Prescription Extractor</h2>
+          <p class="muted">Paste a caregiver note, clinic SMS, or prescription snippet. Non-diagnostic with mandatory human confirmation.</p>
+        </div>
+        <div class="sample-chips">
+          <button class="chip" data-sample="Dr. Verma follow-up appointment tomorrow at 11 AM at Bhopal Heart Care">Sample: Appointment</button>
+          <button class="chip" data-sample="Amlodipine 5mg refill needed, only 2 tablets left">Sample: Refill</button>
+          <button class="chip chip-warn" data-sample="You should double dose of Amlodipine and diagnose high BP">Test Guardrail</button>
+        </div>
+      </div>
+      <div class="extractor-row">
+        <input id="extractInput" type="text" placeholder="e.g. Papa's lab report pickup tomorrow 9 AM, or Metformin 500mg 3 tablets left..." />
+        <button id="btnExtract" class="btn btn-primary">Parse Note</button>
+      </div>
+      <div id="extractPreview" class="extract-preview hidden"></div>
+    </section>
+
+    <div class="main-grid">
+      <!-- Left Column: Tasks & Refills -->
+      <div class="col">
+        <!-- Tasks Section -->
+        <section id="tasksSection" class="card">
+          <div class="card-header">
+            <div>
+              <h2>Tasks &amp; Handoffs</h2>
+              <p class="muted">Pending actions prioritized first • Who does what</p>
+            </div>
+            <button id="btnNewTaskToggle" class="btn btn-small">+ Assign Task</button>
+          </div>
+
+          <form id="newTaskForm" class="inline-form hidden">
+            <input id="taskTitle" type="text" placeholder="Task title (e.g. Escort Papa to clinic)" required />
+            <select id="taskAssignee">
+              <option value="Priya Sharma">Priya Sharma (Local)</option>
+              <option value="Arjun Sharma">Arjun Sharma (Remote)</option>
+              <option value="Sunita Devi">Sunita Devi (Attendant)</option>
+            </select>
+            <input id="taskDue" type="date" required />
+            <div style="display:flex; gap:6px;">
+              <button type="submit" class="btn btn-primary btn-small">Save Task</button>
+              <button type="button" id="btnCancelTask" class="btn btn-outline btn-small">Cancel</button>
+            </div>
+          </form>
+
+          <div id="tasksList" class="stack"></div>
+        </section>
+
+        <!-- Refill Runway Section -->
+        <section id="refillsSection" class="card">
+          <div class="card-header">
+            <div>
+              <h2>Smart Refill Runway</h2>
+              <p class="muted">Sorted by days left • Remote online claim or local pickup</p>
+            </div>
+            <button id="btnNewRefillToggle" class="btn btn-small">+ Add Refill</button>
+          </div>
+
+          <form id="newRefillForm" class="inline-form hidden">
+            <input id="refillMedName" type="text" placeholder="Medicine name (e.g. Telmisartan 40mg)" required />
+            <input id="refillDosage" type="text" placeholder="Dosage (e.g. 1 tab morning)" required />
+            <input id="refillTabs" type="number" min="0" placeholder="Tablets left" style="width:110px;" required />
+            <input id="refillDaily" type="number" min="1" placeholder="Daily dose" style="width:95px;" value="1" required />
+            <div style="display:flex; gap:6px; width:100%;">
+              <button type="submit" class="btn btn-primary btn-small">Save Refill</button>
+              <button type="button" id="btnCancelRefill" class="btn btn-outline btn-small">Cancel</button>
+            </div>
+          </form>
+
+          <div id="refillsList" class="stack"></div>
+        </section>
+      </div>
+
+      <!-- Right Column: Timeline, Fairness, Audit -->
+      <div class="col">
+        <!-- Shared Timeline Section -->
+        <section id="timelineSection" class="card">
+          <div class="card-header">
+            <div>
+              <h2>Shared Care Timeline</h2>
+              <p class="muted">Source-attributed appointments, prescriptions &amp; reports</p>
+            </div>
+            <button id="btnNewTimelineToggle" class="btn btn-small">+ Log Record</button>
+          </div>
+
+          <form id="newTimelineForm" class="inline-form hidden">
+            <select id="recordType">
+              <option value="appointment">Appointment</option>
+              <option value="prescription">Prescription</option>
+              <option value="lab_report">Lab Report</option>
+            </select>
+            <input id="recordTitle" type="text" placeholder="Record Title (e.g. Dr. Verma review)" required />
+            <input id="recordDate" type="date" required />
+            <input id="recordSource" type="text" placeholder="Source (e.g. Clinic Receipt, SMS)" />
+            <textarea id="recordDetails" placeholder="Details or physician instructions..." rows="2" style="width:100%; border:1px solid #d1d5db; border-radius:8px; padding:6px; font-family:inherit;"></textarea>
+            <label style="font-size:0.8rem; display:flex; align-items:center; gap:6px; width:100%;">
+              <input type="checkbox" id="recordCompanionTask" checked /> Automatically create companion escort/reminder task
+            </label>
+            <div style="display:flex; gap:6px; width:100%;">
+              <button type="submit" class="btn btn-primary btn-small">Save Record</button>
+              <button type="button" id="btnCancelTimeline" class="btn btn-outline btn-small">Cancel</button>
+            </div>
+          </form>
+
+          <div id="timelineList" class="stack"></div>
+        </section>
+
+        <!-- Fairness Meter Section -->
+        <section id="fairnessSection" class="card">
+          <div class="card-header">
+            <div>
+              <h2>Care-Load &amp; Expense Fairness</h2>
+              <p class="muted">Balances workload and out-of-pocket ₹ spent across siblings</p>
+            </div>
+          </div>
+          <div id="fairnessList" class="fairness-grid"></div>
+        </section>
+
+        <!-- Immutable Audit Ledger Section -->
+        <section id="auditSection" class="card">
+          <div class="card-header">
+            <div>
+              <h2>Who Did What (Immutable Ledger)</h2>
+              <p class="muted">Server-enforced audit trail of every claim, task &amp; record</p>
+            </div>
+          </div>
+          <div id="auditList" class="audit-list"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Complete Task Modal (Replaces clunky browser prompt) -->
+  <div id="completeTaskModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="completeModalTitle">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <div>
+          <h3 id="completeModalTitle">Mark Task Complete</h3>
+          <p class="muted" id="completeTaskSubtitle">Record verified completion</p>
+        </div>
+        <button id="btnCloseCompleteModal" class="btn btn-outline btn-small">&times;</button>
+      </div>
+      <form id="completeTaskForm">
+        <input type="hidden" id="completeTaskId" />
+        <div class="form-group">
+          <label for="completeNote">Completion Note:</label>
+          <input type="text" id="completeNote" placeholder="e.g. Escorted Papa; received normal BP reading" required />
+        </div>
+        <div class="form-group" id="completeExpenseGroup">
+          <label for="completeExpense">Out-of-Pocket Expense in ₹ (Optional):</label>
+          <input type="number" id="completeExpense" min="0" step="1" placeholder="0" value="0" />
+          <span class="muted" style="font-size:0.75rem;">Will be credited to your fairness balance</span>
+        </div>
+        <div class="modal-actions" style="margin-top:14px; justify-content:flex-end;">
+          <button type="button" id="btnCancelComplete" class="btn btn-outline btn-small">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-small">Verify &amp; Complete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Restock Refill Modal -->
+  <div id="restockRefillModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="restockModalTitle">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <div>
+          <h3 id="restockModalTitle">Restock Medicine Supply</h3>
+          <p class="muted" id="restockRefillSubtitle">Confirm delivery/pickup</p>
+        </div>
+        <button id="btnCloseRestockModal" class="btn btn-outline btn-small">&times;</button>
+      </div>
+      <form id="restockRefillForm">
+        <input type="hidden" id="restockRefillId" />
+        <div class="form-group">
+          <label for="restockTabsAdded">Tablets / Units Received:</label>
+          <input type="number" id="restockTabsAdded" min="1" value="30" required />
+          <span class="muted" style="font-size:0.75rem;">Supply runway will be recalculated automatically</span>
+        </div>
+        <div class="modal-actions" style="margin-top:14px; justify-content:flex-end;">
+          <button type="button" id="btnCancelRestock" class="btn btn-outline btn-small">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-small">Confirm Restocked</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Doctor Visit Brief Modal -->
+  <div id="briefModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="briefTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h2 id="briefTitle">Doctor Visit Brief (Factual Summary)</h2>
+          <p class="muted">Synthetic Patient: Ramesh Sharma, 72 (Bhopal) • Organised records only</p>
+        </div>
+        <div class="modal-actions">
+          <button onclick="window.print()" class="btn btn-primary btn-small">Print / Save PDF</button>
+          <button id="btnCloseBrief" class="btn btn-outline btn-small">Close</button>
+        </div>
+      </div>
+      <div id="briefBody" class="brief-body"></div>
+    </div>
+  </div>
+
+  <script src="/app.js?v=3"></script>
+</body>
+</html>
