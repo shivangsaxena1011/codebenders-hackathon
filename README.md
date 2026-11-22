@@ -3,9 +3,12 @@
 
 [![Hackathon](https://img.shields.io/badge/Hackathon-Codebenders_ACE_Builders_2026-0f766e?style=for-the-badge)](https://app.codebenders.ai/hackathon)
 [![Problem Statement](https://img.shields.io/badge/Problem_Statement_4-Health_%26_Family_Care-blue?style=for-the-badge)](https://app.codebenders.ai/hackathon)
+[![Demo Video](https://img.shields.io/badge/Demo_Video-Watch_MP4-e11d48?style=for-the-badge)](CareRelay_Hackathon_Demo_Final.mp4)
 [![Stack](https://img.shields.io/badge/Stack-Python_3_%2B_SQLite3_%2B_Vanilla_PWA-15803d?style=for-the-badge)](#technical-architecture--zero-dependency-stack)
 [![Mobile Optimized](https://img.shields.io/badge/Mobile-100%25_Responsive_(0px_Overflow)-purple?style=for-the-badge)](#mobile-optimization--pwa-resilience)
 [![Clinical Guardrails](https://img.shields.io/badge/Guardrails-Non--Diagnostic_Enforced-b91c1c?style=for-the-badge)](#clinical-safety--non-diagnostic-guardrails)
+
+> 🎥 **Walkthrough Video:** A recorded video demonstration is available in the repository at [CareRelay_Hackathon_Demo_Final.mp4](CareRelay_Hackathon_Demo_Final.mp4).
 
 ---
 
